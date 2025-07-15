@@ -1,7 +1,14 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronDown, ChevronUp, Heart, ShoppingBag, Filter } from "lucide-react";
+import { collection, getDocs, limit, query, startAfter, orderBy } from "firebase/firestore";
+import { db } from "./Firebase";
+import { Link } from "react-router-dom";
+import { useCart } from "./CardContext";
+import { useFavorites } from "./FavoriteContext";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function LuxuryProductShowcase() {
   const [filters, setFilters] = useState({
@@ -18,139 +25,135 @@ export default function LuxuryProductShowcase() {
   });
   const [hoveredCard, setHoveredCard] = useState(null);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(9);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
 
-  // Her ürüne statik link ekledim
-  const allProducts = [
-    {
-      id: 1,
-      name: "Blanche",
-      brand: "Curren",
-      specifications: "Quartz, Ø 41mm, Gold",
-      price: 250.0,
-      image: "/curren-blanch/curren-gold.png",
-      gender: "Men",
-      color: "Black",
-      link: "productdetails" // Statik link
-    },
-    {
-      id: 2,
-      name: "Corsa",
-      brand: "Curren",
-      specifications: "Quartz Chronograph, Ø 44mm, Leather",
-      price: 430.0,
-      originalPrice: 520.0,
-      image: "/placeholder.svg?height=300&width=300",
-      onSale: true,
-      gender: "Men",
-      color: "Brown",
-      link: "/products/curren-corsa" // Statik link
-    },
-    {
-      id: 3,
-      name: "Strada",
-      brand: "Curren",
-      specifications: "Automatic, Ø 42mm, Black",
-      price: 360.0,
-      image: "/placeholder.svg?height=300&width=300",
-      gender: "Unisex",
-      color: "Black",
-      link: "/products/curren-strada" // Statik link
-    },
-    {
-      id: 4,
-      name: "Monaco",
-      brand: "Polo",
-      specifications: "Manual Wind, Ø 39mm, Steel",
-      price: 180.0,
-      image: "/placeholder.svg?height=300&width=300",
-      gender: "Women",
-      color: "Silver",
-      link: "/products/polo-monaco" // Statik link
-    },
-    {
-      id: 5,
-      name: "Terra Limited Edition",
-      brand: "Poedagar",
-      specifications: "Automatic, Ø 45mm, Carbon",
-      price: 495.0,
-      image: "/placeholder.svg?height=300&width=300",
-      gender: "Men",
-      color: "Black",
-      link: "/products/poedagar-terra" // Statik link
-    },
-    {
-      id: 6,
-      name: "Ring Rose Gold",
-      brand: "BindBond",
-      specifications: "Quartz, Ø 36mm, Rose Gold",
-      price: 150.0,
-      image: "/placeholder.svg?height=300&width=300",
-      gender: "Women",
-      color: "Rose Gold",
-      link: "/products/bindbond-ring" // Statik link
-    },
-    {
-      id: 7,
-      name: "SnakeQueen 39mm",
-      brand: "ZHOWE",
-      specifications: "Automatic, Ø 39mm, Cherry Red",
-      price: 599.0,
-      image: "/placeholder.svg?height=300&width=300",
-      gender: "Women",
-      color: "Red",
-      link: "/products/zhowe-snakequeen" // Statik link
-    },
-    {
-      id: 8,
-      name: "Classic Heritage",
-      brand: "Danlex",
-      specifications: "Automatic, Ø 40mm, Gold",
-      price: 850.0,
-      image: "/placeholder.svg?height=300&width=300",
-      gender: "Men",
-      color: "Gold",
-      link: "/products/danlex-classic" // Statik link
-    },
-    {
-      id: 9,
-      name: "Elegance Pro",
-      brand: "Jhui",
-      specifications: "Quartz, Ø 38mm, Silver",
-      price: 720.0,
-      image: "/placeholder.svg?height=300&width=300",
-      gender: "Women",
-      color: "Silver",
-      link: "/products/jhui-elegance" // Statik link
-    },
-    {
-      id: 10,
-      name: "Sport Master",
-      brand: "TAG Heuer",
-      specifications: "Chronograph, Ø 43mm, Blue",
-      price: 920.0,
-      originalPrice: 1100.0,
-      image: "/placeholder.svg?height=300&width=300",
-      onSale: true,
-      gender: "Unisex",
-      color: "Blue",
-      link: "/products/tagheuer-sport" // Statik link
-    },
-  ];
-  
+  // Context'leri kullan
+  const { addToCart, loading: cartLoading } = useCart();
+  const { 
+    favorites, 
+    loading: favLoading, 
+    addToFavorites, 
+    removeFromFavorites, 
+    isFavorite 
+  } = useFavorites();
+
+  // Firebase'den ürünleri çek
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        let q;
+        if (sortBy === "newest") {
+          q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(itemsPerPage));
+        } else if (sortBy === "price-low") {
+          q = query(collection(db, "products"), orderBy("price", "asc"), limit(itemsPerPage));
+        } else if (sortBy === "price-high") {
+          q = query(collection(db, "products"), orderBy("price", "desc"), limit(itemsPerPage));
+        } else {
+          q = query(collection(db, "products"), limit(itemsPerPage));
+        }
+
+        const querySnapshot = await getDocs(q);
+        const productsData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          imageUrls: doc.data().imageUrls || [],
+          price: parseFloat(doc.data().price).toFixed(2),
+          originalPrice: doc.data().originalPrice ? parseFloat(doc.data().originalPrice).toFixed(2) : null,
+        }));
+
+        setProducts(productsData);
+        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+        setHasMore(productsData.length === itemsPerPage);
+        
+        // Toplam ürün sayısını al (filtreleme için)
+        const countQuery = await getDocs(collection(db, "products"));
+        setTotalProducts(countQuery.size);
+      } catch (error) {
+        console.error("Ürünler yüklenirken hata:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [sortBy]);
+
+  // Sayfa değişikliğinde ürünleri yükle
+  const loadMoreProducts = async () => {
+    try {
+      setLoading(true);
+      let q;
+      if (sortBy === "newest") {
+        q = query(
+          collection(db, "products"),
+          orderBy("createdAt", "desc"),
+          startAfter(lastVisible),
+          limit(itemsPerPage)
+        );
+      } else if (sortBy === "price-low") {
+        q = query(
+          collection(db, "products"),
+          orderBy("price", "asc"),
+          startAfter(lastVisible),
+          limit(itemsPerPage)
+        );
+      } else if (sortBy === "price-high") {
+        q = query(
+          collection(db, "products"),
+          orderBy("price", "desc"),
+          startAfter(lastVisible),
+          limit(itemsPerPage)
+        );
+      } else {
+        q = query(
+          collection(db, "products"),
+          startAfter(lastVisible),
+          limit(itemsPerPage)
+        );
+      }
+
+      const querySnapshot = await getDocs(q);
+      const newProducts = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        imageUrls: doc.data().imageUrls || [],
+        price: parseFloat(doc.data().price).toFixed(2),
+        originalPrice: doc.data().originalPrice ? parseFloat(doc.data().originalPrice).toFixed(2) : null,
+      }));
+
+      setProducts(prev => [...prev, ...newProducts]);
+      setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+      setHasMore(newProducts.length === itemsPerPage);
+      setCurrentPage(prev => prev + 1);
+    } catch (error) {
+      console.error("Daha fazla ürün yüklenirken hata:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const sortOptions = [
-    { value: "featured", label: "Featured" },
-    { value: "price-low", label: "Price: Low to High" },
-    { value: "price-high", label: "Price: High to Low" },
-    { value: "name", label: "Name: A to Z" },
-    { value: "newest", label: "Newest First" },
+    { value: "featured", label: "Öne Çıkanlar" },
+    { value: "price-low", label: "Fiyat: Düşükten Yükseğe" },
+    { value: "price-high", label: "Fiyat: Yüksekten Düşüğe" },
+    { value: "name", label: "İsim: A'dan Z'ye" },
+    { value: "newest", label: "Yeniler" },
   ];
-  
-  const availableBrands = [...new Set(allProducts.map((p) => p.brand))];
-  const availableGenders = ["Men", "Women", "Unisex"];
-  const availableColors = [...new Set(allProducts.map((p) => p.color))];
+
+  // Mevcut filtre seçeneklerini dinamik olarak oluştur
+  const availableBrands = [...new Set(products.map((p) => p.brand))];
+  const availableGenders = [...new Set(products.map((p) => p.gender))];
+  const availableColors = [...new Set(products.map((p) => p.color))];
 
   const filteredAndSortedProducts = useMemo(() => {
-    const filtered = allProducts.filter((product) => {
+    const filtered = products.filter((product) => {
       const brandMatch = filters.brands.length === 0 || filters.brands.includes(product.brand);
       const genderMatch = filters.gender.length === 0 || filters.gender.includes(product.gender);
       const colorMatch = filters.colors.length === 0 || filters.colors.includes(product.color);
@@ -158,7 +161,7 @@ export default function LuxuryProductShowcase() {
       return brandMatch && genderMatch && colorMatch && priceMatch;
     });
 
-    // Sort products
+    // Ürünleri sırala
     switch (sortBy) {
       case "price-low":
         filtered.sort((a, b) => a.price - b.price);
@@ -170,14 +173,14 @@ export default function LuxuryProductShowcase() {
         filtered.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case "newest":
-        filtered.sort((a, b) => b.id - a.id);
+        filtered.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         break;
       default:
-        // Featured - keep original order
+        // Öne çıkanlar - orijinal sıra
         break;
     }
     return filtered;
-  }, [filters, sortBy]);
+  }, [filters, sortBy, products]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters((prev) => {
@@ -196,86 +199,141 @@ export default function LuxuryProductShowcase() {
     }));
   };
 
-  const handleAddToCart = (product) => {
-    alert(`Added ${product.brand} ${product.name} to cart!`);
+  const handleAddToCart = async (product) => {
+    try {
+      await addToCart(product, 1); // Varsayılan olarak 1 adet ekle
+      toast.success(`${product.name} sepete eklendi!`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } catch (err) {
+      console.error("Hata:", err);
+      toast.error("Sepete eklemek için giriş yapmalısınız!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
   };
 
-  const handleToggleWishlist = (productId) => {
-    console.log(`Toggled wishlist for product ${productId}`);
+  const handleToggleWishlist = async (product) => {
+    try {
+      if (isFavorite(product.id)) {
+        await removeFromFavorites(product.id);
+        toast.info("Favorilərdən çıxarıldı", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+      } else {
+        await addToFavorites({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          imageUrls: product.imageUrls,
+          brand: product.brand
+        });
+        toast.success("Favorilərə əlavə edildi", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+      }
+    } catch (err) {
+      console.error("Favori əməliyyatı xətası:", err);
+      if (err.message === "Giriş yapmalısınız") {
+        toast.error("Favorilərə əlavə etmək üçün giriş etməlisiniz!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      } else {
+        toast.error("Xəta baş verdi, zəhmət olmasa yenidən cəhd edin", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    }
   };
 
   const clearAllFilters = () => {
     setFilters({ brands: [], gender: [], colors: [], priceRange: [0, 1000] });
   };
 
-  // Product Card Component
+  // Ürün Kartı Bileşeni
   const ProductCard = ({ product }) => {
     const isHovered = hoveredCard === product.id;
+    const imageUrls = product.imageUrls || [];
+    const mainImage = imageUrls.length > 0 ? imageUrls[0] : "/placeholder.svg";
+    
     return (
       <div
         className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group max-w-sm mx-auto"
         onMouseEnter={() => setHoveredCard(product.id)}
         onMouseLeave={() => setHoveredCard(null)}
       >
-        {/* Image Container with Link */}
-        <a href={product.link} className="block">
+        {/* Resim Container */}
+        <Link to={`/products/${product.id}`} className="block">
           <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
             <img
-              src={product.image || "/placeholder.svg?height=300&width=300"}
+              src={mainImage}
               alt={`${product.brand} ${product.name}`}
               width={300}
               height={300}
               className="w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-300"
             />
-            {/* Wishlist Button */}
+            {/* Favori Butonu */}
             <button
               onClick={(e) => {
                 e.preventDefault();
-                handleToggleWishlist(product.id);
+                handleToggleWishlist(product);
               }}
               className={`absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-all duration-300 ${
                 isHovered ? "opacity-100" : "opacity-0"
               }`}
-              aria-label="Add to wishlist"
+              aria-label="Favorilere ekle"
+              disabled={favLoading}
             >
-              <Heart className="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" />
+              <Heart className={`w-5 h-5 ${isFavorite(product.id) ? 'text-red-500 fill-current' : 'text-gray-600 hover:text-red-500'} transition-colors`} />
             </button>
-            {/* Sale Badge */}
+            {/* İndirim Etiketi */}
             {product.onSale && (
               <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 text-xs font-bold rounded">
-                SALE
+                İNDİRİM
               </div>
             )}
           </div>
-        </a>
+        </Link>
 
-        {/* Product Info with Link */}
+        {/* Ürün Bilgileri */}
         <div className="p-6 space-y-3">
-          <a href={product.link} className="block">
-            {/* Brand and Name */}
+          <Link to={`/products/${product.id}`} className="block">
+            {/* Marka ve İsim */}
             <div className="space-y-1">
               <h3 className="text-lg leading-tight">
                 <span className="italic text-gray-800 font-serif">{product.brand}</span>{" "}
                 <span className="font-normal">{product.name}</span>
               </h3>
-              <p className="text-sm text-gray-600 font-medium">{product.specifications}</p>
+              <p className="text-sm text-gray-600 font-medium">{product.color || "Renk bilgisi yok"}</p>
             </div>
-            {/* Price */}
+            {/* Fiyat */}
             <div className="flex items-center gap-2">
-              <span className="text-xl font-semibold text-gray-900">₼{product.price.toFixed(2)}</span>
+              <span className="text-xl font-semibold text-gray-900">₼{product.price}</span>
               {product.originalPrice && (
-                <span className="text-sm text-gray-500 line-through">${product.originalPrice.toFixed(2)}</span>
+                <span className="text-sm text-gray-500 line-through">₼{product.originalPrice}</span>
               )}
             </div>
-          </a>
+          </Link>
           
-          {/* Add to Cart Button */}
+          {/* Sepete Ekle Butonu */}
           <button
             onClick={() => handleAddToCart(product)}
-            className="w-full mt-4 bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 font-medium tracking-wide transition-colors duration-300 flex items-center justify-center gap-2"
+            disabled={cartLoading || product.stock <= 0}
+            className={`w-full mt-4 bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 font-medium tracking-wide transition-colors duration-300 flex items-center justify-center gap-2 ${
+              cartLoading ? 'opacity-75 cursor-not-allowed' : ''
+            } ${
+              product.stock <= 0 ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed' : ''
+            }`}
           >
             <ShoppingBag className="w-4 h-4" />
-            ADD TO CART
+            {product.stock <= 0 ? 'STOKTA YOK' : 
+             cartLoading ? 'EKLEMİYOR...' : 'Səbətə Əlavə Et'}
           </button>
         </div>
       </div>
@@ -284,13 +342,13 @@ export default function LuxuryProductShowcase() {
 
   const FilterContent = () => (
     <div className="bg-white rounded-lg shadow-sm p-6">
-      {/* Brands Filter */}
+      {/* Marka Filtresi */}
       <div className="mb-6">
         <button
           onClick={() => toggleSection("brands")}
           className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-3"
         >
-          BRANDS
+          Markalar
           {expandedSections.brands ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
         {expandedSections.brands && (
@@ -309,13 +367,13 @@ export default function LuxuryProductShowcase() {
           </div>
         )}
       </div>
-      {/* Gender Filter */}
+      {/* Cinsiyet Filtresi */}
       <div className="mb-6">
         <button
           onClick={() => toggleSection("gender")}
           className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-3"
         >
-          GENDER
+          Cinsiyet
           {expandedSections.gender ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
         {expandedSections.gender && (
@@ -334,13 +392,13 @@ export default function LuxuryProductShowcase() {
           </div>
         )}
       </div>
-      {/* Color Filter */}
+      {/* Renk Filtresi */}
       <div className="mb-6">
         <button
           onClick={() => toggleSection("color")}
           className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-3"
         >
-          COLOR
+          Renkler
           {expandedSections.color ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
         {expandedSections.color && (
@@ -359,31 +417,44 @@ export default function LuxuryProductShowcase() {
           </div>
         )}
       </div>
-      {/* Clear Filters Button */}
+      {/* Filtreleri Temizle Butonu */}
       <button onClick={clearAllFilters} className="w-full text-sm text-gray-600 hover:text-gray-900 underline">
-        Clear All Filters
+        Tüm Filtreleri Temizle
       </button>
     </div>
   );
 
+  if (loading && currentPage === 1) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Ürünler yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <ToastContainer position="top-right" autoClose={3000} />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Başlık */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-serif text-gray-900 mb-4">Luxury Timepieces</h1>
+          <h1 className="text-4xl font-serif text-gray-900 mb-4">Lüks Saat Kolleksiyamız</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover our collection of premium watches, crafted with precision and designed for the modern connoisseur.
+           Müasir zövqlərə uyğun, xüsusi zövqlə hazırlanmış premium saat kolleksiyamızı kəşf edin.
           </p>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Filters Sidebar - Desktop */}
+          {/* Filtreler - Masaüstü */}
           <div className="hidden md:block w-64 flex-shrink-0 sticky top-8 self-start">
             <FilterContent />
           </div>
 
-          {/* Mobile Filter Overlay and Sidebar */}
+          {/* Mobil Filtre */}
           {isMobileFilterOpen && (
             <div
               className="fixed inset-0 bg-black/50 z-50 md:hidden"
@@ -401,14 +472,14 @@ export default function LuxuryProductShowcase() {
           >
             <div className="p-6 pb-0">
               <h2 id="mobile-filter-title" className="text-xl font-semibold text-gray-900 mb-4">
-                Filters
+                Filtreler
               </h2>
               <FilterContent />
             </div>
             <button
               onClick={() => setIsMobileFilterOpen(false)}
               className="absolute top-4 right-4 p-2 text-gray-600 hover:text-gray-900"
-              aria-label="Close filters"
+              aria-label="Filtreleri kapat"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -428,11 +499,11 @@ export default function LuxuryProductShowcase() {
             </button>
           </div>
 
-          {/* Main Content */}
+          {/* Ana İçerik */}
           <div className="flex-1">
-            {/* Header with product count and sort */}
+            {/* Ürün sayısı ve sıralama */}
             <div className="flex items-center justify-between mb-8">
-              {/* Filter button for mobile */}
+              {/* Mobil filtre butonu */}
               <button
                 onClick={() => setIsMobileFilterOpen(true)}
                 className="md:hidden flex items-center gap-2 border border-gray-300 rounded px-4 py-2 text-sm bg-white hover:bg-gray-50"
@@ -440,10 +511,12 @@ export default function LuxuryProductShowcase() {
                 aria-expanded={isMobileFilterOpen}
               >
                 <Filter className="w-4 h-4" />
-                Filters
+                Filtreler
               </button>
 
-              <div className="text-sm text-gray-600">{filteredAndSortedProducts.length} products</div>
+              <div className="text-sm text-gray-600">
+                {filteredAndSortedProducts.length} ürün (Toplam: {totalProducts})
+              </div>
               <div className="relative">
                 <select
                   value={sortBy}
@@ -460,26 +533,41 @@ export default function LuxuryProductShowcase() {
               </div>
             </div>
 
-            {/* Product Grid */}
+            {/* Ürün Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
               {filteredAndSortedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
 
-            {/* No results message */}
+            {/* Sonuç yoksa */}
             {filteredAndSortedProducts.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
+                <p className="text-gray-500 text-lg">Filtrelerinize uygun ürün bulunamadı.</p>
                 <button onClick={clearAllFilters} className="mt-4 text-gray-900 underline hover:no-underline">
-                  Clear all filters
+                  Tüm filtreleri temizle
+                </button>
+              </div>
+            )}
+
+            {/* Pagination / Daha Fazla Yükle */}
+            {hasMore && filteredAndSortedProducts.length > 0 && (
+              <div className="mt-8 text-center">
+                <button
+                  onClick={loadMoreProducts}
+                  disabled={loading}
+                  className={`px-6 py-3 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors ${
+                    loading ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {loading ? 'Yükleniyor...' : 'Daha Fazla Yükle'}
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Features Section */}
+        {/* Özellikler Bölümü */}
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center p-6">
             <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -492,8 +580,8 @@ export default function LuxuryProductShowcase() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Free Shipping</h3>
-            <p className="text-gray-600">Free worldwide shipping on all orders over $200</p>
+            <h3 className="text-lg font-semibold mb-2">Ücretsiz Kargo</h3>
+            <p className="text-gray-600">200 TL üzeri tüm siparişlerde ücretsiz kargo</p>
           </div>
           <div className="text-center p-6">
             <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -506,8 +594,8 @@ export default function LuxuryProductShowcase() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">2 Year Warranty</h3>
-            <p className="text-gray-600">Comprehensive warranty coverage for peace of mind</p>
+            <h3 className="text-lg font-semibold mb-2">2 Yıl Garanti</h3>
+            <p className="text-gray-600">Tüm ürünlerimiz 2 yıl garantilidir</p>
           </div>
           <div className="text-center p-6">
             <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -520,8 +608,8 @@ export default function LuxuryProductShowcase() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Expert Support</h3>
-            <p className="text-gray-600">24/7 customer support from watch specialists</p>
+            <h3 className="text-lg font-semibold mb-2">Uzman Desteği</h3>
+            <p className="text-gray-600">7/24 uzman müşteri desteği</p>
           </div>
         </div>
       </div>

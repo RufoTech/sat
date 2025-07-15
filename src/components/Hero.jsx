@@ -50,26 +50,26 @@ const Hero = () => {
           <div className="hero-1">
             <div className="bg-watch">
               <div className="container mx-auto">
-                <h1 className="playfair-display text-white percents">OPENING SALE</h1>
+                <h1 className="playfair-display text-white percents">AÇILIŞ ENDİRİMİ</h1>
                 <h1 className="playfair-display text-white percent-">
-                  Take <span className="tab-a">50%</span> Off
+                  Saatlar <span className="tab-">30%-ə</span> Qədər
                 </h1>
                 <div className="btn-div flex items-center justify-center shop-i5">
                   <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
-                    <h3 className="shop-text">Shop Now</h3>
+                    <h3 className="shop-text">İndi Al</h3>
                   </button>
                 </div>
               </div>
             </div>
             <div className="bg-watch-mobile">
               <div className="container mx-auto">
-                <h1 className="playfair-display text-white percents">OPENING SALE</h1>
+                <h1 className="playfair-display text-white percents">AÇILIŞ ENDİRİMİ</h1>
                 <h1 className="playfair-display text-white percent-">
-                  Take <span className="">50%</span> Off
+                  Saatlar <span className="">50%-ə</span> Qədər
                 </h1>
                 <div className="btn-div flex items-center justify-center shop-i5 boba">
                   <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
-                    Shop Now
+                   İndi Al
                   </button>
                 </div>
               </div>
@@ -83,26 +83,26 @@ const Hero = () => {
           <div className="hero-2">
             <div className="bg-watch-2">
               <div className="container mx-auto">
-                <h1 className="playfair-display text-white percents">ORIGINAL DEALS</h1>
+                <h1 className="playfair-display text-white percents">KEYFİYYƏTLİ MƏHSULLAR</h1>
                 <h1 className="playfair-display text-white percent-">
-                 Good <span className="tab-">Quality</span> Watches
+                 Yüksək <span className="tab-">Keyfiyyətli</span> Məhsullar
                 </h1>
                 <div className="btn-div flex items-center justify-center shop-i5">
                   <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
-                    <h3 className="shop-text">Shop Now</h3>
+                    <h3 className="shop-text">İndi Al</h3>
                   </button>
                 </div>
               </div>
             </div>
             <div className="bg-watch-mobile-2">
               <div className="container mx-auto">
-                <h1 className="playfair-display text-white percents">ORIGINAL DEALS</h1>
+                <h1 className="playfair-display text-white percents">KEYFİYYƏTLİ MƏHSULLAR</h1>
                 <h1 className="playfair-display text-white percent-">
-                 Good <br /><span className="">Quality</span> <br />Watches
+                 Yüksək <br /><span className="">Keyfiyyətli</span> <br />Saatlar
                 </h1>
                 <div className="btn-div flex items-center justify-center shop-i5 boba">
                   <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
-                    Shop Now
+                    İndi Al
                   </button>
                 </div>
               </div>

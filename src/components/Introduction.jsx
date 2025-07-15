@@ -14,12 +14,12 @@ const Introduction = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end pb-10 justify-center">
           <div className="text-center px-4">
             {/* Başlıklar */}
-            <h2 className="text-white text-3xl playfair-display font-bold">Biggest Deals</h2>
-            <h1 className="text-white paraqraf font-bold py-3">Great Gifts For Great Prices</h1>
+            <h2 className="text-white text-3xl playfair-display font-bold">Böyük Fürsətlər</h2>
+            <h1 className="text-white paraqraf font-bold py-3">Əla Qiymətlərə Əla Hədiyyələr</h1>
             
             {/* Buton - Hover'da hareket etmiyor, her zaman görünür */}
             <button className="bg-blue-700 text-white font-bold px-6 py-2 rounded-md hover:bg-blue-800 transition duration-300">
-              SHOP SALE ITEMS
+              Endirimli Məhsullarla Alış-veriş et
             </button>
           </div>
         </div>
@@ -37,12 +37,12 @@ const Introduction = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end pb-10 justify-center">
           <div className="text-center px-4">
             {/* Başlıklar */}
-            <h1 className="text-white paraqraf paraqrafs tracking-widest">ARCHETYPE</h1>
-            <h2 className="text-white text-3xl py-3 playfair-display font-bold">UP TO 50% OFF</h2>
+            <h1 className="text-white paraqraf paraqrafs tracking-widest">Xususi Arxitektura</h1>
+            <h2 className="text-white text-3xl py-3 playfair-display font-bold">30 Faizə Qədər Endirimlər</h2>
             
             {/* Buton - Hover'da hareket etmiyor, her zaman görünür */}
             <button className="bg-blue-700 text-white font-bold text-sm sm:text-base px-4 sm:px-6 py-2 rounded-md hover:bg-blue-800 transition duration-300 whitespace-nowrap overflow-hidden tracking-[0.12em] uppercase">
-              SHOP SALE ITEMS
+              Endirimli Məhsullarla Alış-veriş et
             </button>
           </div>
         </div>

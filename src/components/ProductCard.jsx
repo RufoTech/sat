@@ -54,9 +54,9 @@ export default function ProductCards() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-serif text-gray-900 mb-4">Luxury Timepieces</h1>
+          <h1 className="text-4xl font-serif text-gray-900 mb-4">Lüks Saatlar</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover our collection of premium watches, crafted with precision and designed for the modern connoisseur.
+            Müasir saat həvəskarları üçün diqqətlə hazırlanmış premium saat kolleksiyamızı kəşf edin.
           </p>
         </div>
 
@@ -166,8 +166,8 @@ export default function ProductCards() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Free Shipping</h3>
-            <p className="text-gray-600">Free worldwide shipping on all orders over $200</p>
+            <h3 className="text-lg font-semibold mb-2">Pulsuz Çatdırılma</h3>
+            <p className="text-gray-600">50 Manat Üstü Sifarişlərdə Pulsuz Çatdırılma</p>
           </div>
 
           <div className="text-center p-6">
@@ -181,8 +181,8 @@ export default function ProductCards() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">2 Year Warranty</h3>
-            <p className="text-gray-600">Comprehensive warranty coverage for peace of mind</p>
+            <h3 className="text-lg font-semibold mb-2">6 Ay Zəmanət</h3>
+            <p className="text-gray-600">Tüm Məhsullara 6 Ay Zəmanət</p>
           </div>
 
           <div className="text-center p-6">
@@ -196,8 +196,9 @@ export default function ProductCards() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Expert Support</h3>
-            <p className="text-gray-600">24/7 customer support from watch specialists</p>
+            <h3 className="text-lg font-semibold mb-2">Müasir Texniki Dəstək</h3>
+            <p className="text-gray-600">
+Saat mütəxəssislərindən 24/7 müştəri dəstəyi</p>
           </div>
         </div>
       </div>

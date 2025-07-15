@@ -1,58 +1,107 @@
-// src/components/Login.jsx
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { auth, provider } from './Firebase'; // Yolunuza görə düzəldin
+import { useNavigate, Link } from 'react-router-dom';
+import { auth, provider } from './Firebase';
 import {
   signInWithPopup,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 
 const Login = () => {
   const [user, setUser] = useState(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
+  const [resetError, setResetError] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Auth status dinləyicisi
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, currentUser => {
       setUser(currentUser);
       if (currentUser) {
-        navigate('/'); // Əgər artıq login varsa, ana səhifəyə yönləndir
+        navigate('/');
       }
     });
     return () => unsubscribe();
   }, [navigate]);
 
-  // Google ilə login
   const loginWithGoogle = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
-      navigate('/'); // login sonrası ana səhifə
+      setLoading(true);
+      await signInWithPopup(auth, provider);
     } catch (error) {
-      console.error('Giriş zamanı xəta:', error);
+      setError('Email yaxud şifrə səhfdir');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Çıxış
+  const loginWithEmail = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!email || !password) {
+      setError('Email və şifrə tələb olunur');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      setError('Email yaxud şifrə səhfdir');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       await signOut(auth);
-      setUser(null);
-      navigate('/login'); // çıxış sonrası login səhifəsi
     } catch (error) {
-      console.error('Çıxış zamanı xəta:', error);
+      setError('Xəta baş verdi');
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setResetError('');
+    setResetMessage('');
+    
+    if (!resetEmail) {
+      setResetError('Email ünvanı daxil edin');
+      return;
+    }
+
+    try {
+      setResetLoading(true);
+      await sendPasswordResetEmail(auth, resetEmail);
+      setResetMessage('Şifrə sıfırlama linki email ünvanınıza göndərildi(Link gəlməz isə spam qutusuna baxmağı unutmayın)!');
+      setTimeout(() => {
+        setShowResetModal(false);
+        setResetMessage('');
+      }, 3000);
+    } catch (error) {
+      setResetError('Xəta baş verdi: ' + error.message);
+    } finally {
+      setResetLoading(false);
     }
   };
 
   return (
     <div className="flex justify-center mt-12">
       <form
-        onSubmit={e => e.preventDefault()}
+        onSubmit={loginWithEmail}
         className="bg-white p-8 w-[450px] rounded-2xl flex flex-col gap-4 font-sans"
       >
         {user ? (
-          // Əgər login varsa
           <div className="flex flex-col items-center gap-4">
             <h2 className="text-xl font-semibold">
               Salam, {user.displayName} 👋
@@ -72,9 +121,7 @@ const Login = () => {
             </button>
           </div>
         ) : (
-          // Hələ login olunmayıbsa
           <>
-            {/* Email Field */}
             <label className="font-semibold text-gray-800">Email</label>
             <div className="flex items-center border border-gray-200 rounded-lg h-12 px-3 focus-within:border-blue-500 transition">
               <svg
@@ -85,13 +132,15 @@ const Login = () => {
                 <path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z" />
               </svg>
               <input
-                type="text"
-                placeholder="Enter your Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Emailinizi daxil edin"
                 className="ml-3 flex-1 outline-none"
+                required
               />
             </div>
 
-            {/* Password Field */}
             <label className="font-semibold text-gray-800">Password</label>
             <div className="flex items-center border border-gray-200 rounded-lg h-12 px-3 focus-within:border-blue-500 transition">
               <svg
@@ -104,8 +153,11 @@ const Login = () => {
               </svg>
               <input
                 type="password"
-                placeholder="Enter your Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Şifrənizi Daxil Edin"
                 className="ml-3 flex-1 outline-none"
+                required
               />
               <svg
                 className="w-5 h-5 text-gray-400"
@@ -116,38 +168,53 @@ const Login = () => {
               </svg>
             </div>
 
-            {/* Remember & Forgot */}
+            {error && (
+              <div className="text-red-500 text-sm mb-2">{error}</div>
+            )}
+
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2">
                 <input type="checkbox" />
-                Remember me
+                Məni Xatırla
               </label>
-              <button type="button" className="text-blue-500">
-                Forgot password?
+              <button 
+                type="button" 
+                onClick={() => setShowResetModal(true)}
+                className="text-blue-500 hover:underline"
+              >
+                Şifrəmi Unutdum?
               </button>
             </div>
 
-            {/* Sign In */}
-            <button className="mt-4 w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition">
-              Sign In
+            <button
+              type="submit"
+              disabled={loading}
+              className={`mt-4 w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition ${
+                loading ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
+            >
+              {loading ? 'Loading...' : 'Daxil Ol'}
             </button>
 
             <p className="text-center text-sm">
-              Don't have an account?{' '}
-              <button type="button" className="text-blue-500 font-medium">
-                Sign Up
-              </button>
+             Hesabınız Yoxdur?{' '}
+              <Link to="/register">
+                <button type="button" className="text-blue-500 font-medium">
+                  Qeydiyyatdan Keçin
+                </button>
+              </Link>
             </p>
 
-            <p className="text-center text-sm text-gray-500">Or With</p>
+            <p className="text-center text-sm text-gray-500">Və ya Google ilə daxil ol</p>
 
-            {/* Social Buttons */}
             <div className="flex flex-col gap-3">
-              {/* Google */}
               <button
                 type="button"
                 onClick={loginWithGoogle}
-                className="w-full flex items-center justify-center gap-2 h-12 border border-gray-200 rounded-lg hover:border-blue-500 transition"
+                disabled={loading}
+                className={`w-full flex items-center justify-center gap-2 h-12 border border-gray-200 rounded-lg hover:border-blue-500 transition ${
+                  loading ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
               >
                 <svg
                   width={20}
@@ -174,27 +241,79 @@ const Login = () => {
                 </svg>
                 Google
               </button>
-
-              {/* Apple */}
-              <button
-                type="button"
-                className="w-full flex items-center justify-center gap-2 h-12 border border-gray-200 rounded-lg hover:border-blue-500 transition"
-              >
-                <svg
-                  width={20}
-                  height={20}
-                  viewBox="0 0 22.773 22.773"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M15.769,0c0.053,0,0.106,0,0.162,0c0.13,1.606-0.483,2.806-1.228,3.675c-0.731,0.863-1.732,1.7-3.351,1.573c-0.108-1.583,0.506-2.694,1.25-3.561C13.292,0.879,14.557,0.16,15.769,0Z" />
-                  <path d="M20.67,16.716c0,0.016,0,0.03,0,0.045c-0.455,1.378-1.104,2.559-1.896,3.655c-0.723,0.995-1.609,2.334-3.191,2.334c-1.367,0-2.275-0.879-3.676-0.903c-1.482-0.024-2.297,0.735-3.652,0.926c-0.155,0-0.31,0-0.462,0c-0.995-0.144-1.798-0.932-2.383-1.642c-1.725-2.098-3.058-4.808-3.306-8.276c0-0.34,0-0.679,0-1.019c0.105-2.482,1.311-4.5,2.914-5.478c0.846-0.52,2.009-0.963,3.304-0.765c0.555,0.086,1.122,0.276,1.619,0.464c0.471,0.181,1.06,0.502,1.618,0.485c0.378-0.011,0.754-0.208,1.135-0.347c1.116-0.403,2.21-0.865,3.652-0.648c1.733,0.262,2.963,1.032,3.723,2.22c-1.466,0.933-2.625,2.339-2.427,4.74C17.818,14.688,19.086,15.964,20.67,16.716Z" />
-                </svg>
-                Apple
-              </button>
             </div>
           </>
         )}
       </form>
+
+      {/* Şifrə Sıfırlama Modalı */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Şifrəni Sıfırla</h3>
+              <button 
+                onClick={() => {
+                  setShowResetModal(false);
+                  setResetError('');
+                  setResetMessage('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                &times;
+              </button>
+            </div>
+            
+            {resetMessage ? (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                {resetMessage}
+              </div>
+            ) : (
+              <>
+                <p className="mb-4">Şifrə sıfırlama linki almaq üçün email ünvanınızı daxil edin.</p>
+                
+                {resetError && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {resetError}
+                  </div>
+                )}
+                
+                <form onSubmit={handleResetPassword}>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-2">Email Ünvanı</label>
+                    <input
+                      type="email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowResetModal(false)}
+                      className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                    >
+                      Ləğv et
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={resetLoading}
+                      className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 ${
+                        resetLoading ? 'opacity-70 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {resetLoading ? 'Göndərilir...' : 'Göndər'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

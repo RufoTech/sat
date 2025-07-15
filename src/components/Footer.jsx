@@ -7,18 +7,20 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Newsletter Signup */}
           <div className="lg:col-span-1">
-            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">Sign Up and Save</h3>
+            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">
+              Abunə Ol və Endirim Qazanın
+            </h3>
             <p className="text-sm text-gray-600 mb-4">
-              Subscribe to get special offers, free giveaways, and exclusive deals.
+              Xüsusi təkliflər, pulsuz hədiyyələr və eksklüziv kampaniyalar üçün abunə olun.
             </p>
             <div className="flex flex-col space-y-3">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="E-poçt ünvanınızı daxil edin"
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button className="px-4 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 transition-colors duration-200 w-fit">
-                Subscribe
+                Abunə Ol
               </button>
             </div>
             <div className="flex space-x-4 mt-6">
@@ -39,36 +41,38 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">Company</h3>
+            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">
+              Şirkət
+            </h3>
             <ul className="space-y-3">
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Our Story
+                  Haqqımızda
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Reviews
+                  Rəylər
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Blog
+                  Bloq
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  VIP Text Club
+                  VIP Mətn Klubu
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  100% Authentic
+                  100% Orijinal
                 </a>
               </li>
               <li>
                 <a href="mailto:contact@watches.com" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  contact@watches.com
+                  valorewatch@gmail.com
                 </a>
               </li>
             </ul>
@@ -76,36 +80,38 @@ export default function Footer() {
 
           {/* Shop */}
           <div>
-            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">Shop</h3>
+            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">
+              Mağaza
+            </h3>
             <ul className="space-y-3">
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Brands
+                  Brendlər
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Collections
+                  Kolleksiyalar
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Men
+                  Kişilər
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Women
+                  Qadınlar
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  New
+                  Yeni
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Sale
+                  Endirimlər
                 </a>
               </li>
             </ul>
@@ -113,36 +119,38 @@ export default function Footer() {
 
           {/* Customer Service */}
           <div>
-            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">Customer Service</h3>
+            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">
+              Müştəri Xidməti
+            </h3>
             <ul className="space-y-3">
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  My Account
+                  Hesabım
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Navidium Protection
+                  Navidium Mühafizəsi
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Shipping
+                  Çatdırılma
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Returns
+                  Geri Qaytarma
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  FAQ
+                  Tez-tez Verilən Suallar
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Contact Us
+                  Bizimlə Əlaqə
                 </a>
               </li>
             </ul>
@@ -150,21 +158,23 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">Legal</h3>
+            <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-900 mb-4">
+              Hüquqi Məlumat
+            </h3>
             <ul className="space-y-3">
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Terms of Service
+                  İstifadə Şərtləri
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Accessibility
+                  Əlçatanlıq
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                  Privacy Policy
+                  Məxfilik Siyasəti
                 </a>
               </li>
             </ul>
@@ -178,7 +188,7 @@ export default function Footer() {
               VALORE WATCH
             </span>
           </div>
-          <p className="text-sm text-gray-600">© 2025 Watches.com All Rights Reserved</p>
+          <p className="text-sm text-gray-600">© 2025 Watches.com Bütün Hüquqlar Qorunur</p>
         </div>
       </div>
     </footer>
