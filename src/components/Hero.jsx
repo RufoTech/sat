@@ -1,4 +1,6 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
+
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination, Navigation } from 'swiper/modules'
 import 'swiper/css'
@@ -52,12 +54,12 @@ const Hero = () => {
               <div className="container mx-auto">
                 <h1 className="playfair-display text-white percents">AÇILIŞ ENDİRİMİ</h1>
                 <h1 className="playfair-display text-white percent-">
-                  Saatlar <span className="tab-">30%-ə</span> Qədər
+                  Saatlar <span className="tab-">30%</span> Qədər
                 </h1>
                 <div className="btn-div flex items-center justify-center shop-i5">
-                  <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
-                    <h3 className="shop-text">İndi Al</h3>
-                  </button>
+                  <Link to={"/brands"}><button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
+                   İndi Al
+                  </button></Link>
                 </div>
               </div>
             </div>
@@ -65,12 +67,12 @@ const Hero = () => {
               <div className="container mx-auto">
                 <h1 className="playfair-display text-white percents">AÇILIŞ ENDİRİMİ</h1>
                 <h1 className="playfair-display text-white percent-">
-                  Saatlar <span className="">50%-ə</span> Qədər
+                  Saatlar <span className="">50%</span> Qədər
                 </h1>
                 <div className="btn-div flex items-center justify-center shop-i5 boba">
-                  <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
+                  <Link to={"/brands"}><button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
                    İndi Al
-                  </button>
+                  </button></Link>
                 </div>
               </div>
             </div>
@@ -88,9 +90,9 @@ const Hero = () => {
                  Yüksək <span className="tab-">Keyfiyyətli</span> Məhsullar
                 </h1>
                 <div className="btn-div flex items-center justify-center shop-i5">
-                  <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
-                    <h3 className="shop-text">İndi Al</h3>
-                  </button>
+                  <Link to={"/brands"}><button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
+                   İndi Al
+                  </button></Link>
                 </div>
               </div>
             </div>
@@ -101,9 +103,9 @@ const Hero = () => {
                  Yüksək <br /><span className="">Keyfiyyətli</span> <br />Saatlar
                 </h1>
                 <div className="btn-div flex items-center justify-center shop-i5 boba">
-                  <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
-                    İndi Al
-                  </button>
+                  <Link to={"/brands"}><button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
+                   İndi Al
+                  </button></Link>
                 </div>
               </div>
             </div>

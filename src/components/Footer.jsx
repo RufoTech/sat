@@ -1,4 +1,5 @@
-import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { Facebook, Instagram, Youtube } from "lucide-react";
+import { FaTiktok } from "react-icons/fa";
 
 export default function Footer() {
   return (
@@ -24,14 +25,15 @@ export default function Footer() {
               </button>
             </div>
             <div className="flex space-x-4 mt-6">
+              <a href="https://www.instagram.com/valorewatch.az/" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <Instagram size={20} />
+                
+              </a>
+              <a href="https://www.tiktok.com/@valorewatch.az?_t=ZS-8y4ZCLqB58r&_r=1" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <FaTiktok size={20} />
+              </a>
               <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
                 <Facebook size={20} />
-              </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                <Twitter size={20} />
-              </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                <Instagram size={20} />
               </a>
               <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
                 <Youtube size={20} />

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { Volume2, VolumeX } from 'lucide-react'
+import { Link } from 'react-router-dom';
 
 const VideoOverlay = () => {
   const containerRef = useRef(null)
@@ -67,9 +68,9 @@ const VideoOverlay = () => {
             Yeni saat kolleksiyamızla tanış olun.
           </p>
            <div className="button-overlay flex items-center justify-center">
-            <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
-                    <h3 className="shop-text">Shop Now</h3>
-                  </button>
+           <Link to={"/brands"}> <button className="bg-white text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 flex justify-center">
+                    <h3 className="shop-text">Indi Al</h3>
+                  </button></Link>
            </div>
         </div>
       </div>

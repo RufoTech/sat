@@ -23,6 +23,7 @@ import { CartProvider } from './components/CardContext';
 import { FavoritesProvider } from './components/FavoriteContext';
 import CheckoutPage from './components/CheckoutPage';
 import ThankYouPage from './components/Thankyou';
+import ScrollToTop from './components/ScrollTop';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -39,6 +40,7 @@ function App() {
     <FavoritesProvider>
       <CartProvider>
         <BrowserRouter>
+        <ScrollToTop/>
           <NavbarComponent user={user} />
 
           <Routes>

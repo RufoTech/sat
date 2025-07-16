@@ -1,66 +1,145 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState, useEffect } from "react";
+import { doc, getDoc, getDocs, collection, query, where } from "firebase/firestore";
+import { db } from "./Firebase";
+import { Heart, ShoppingBag } from "lucide-react";
+import { useCart } from "./CardContext";
+import { useFavorites } from "./FavoriteContext";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ProductCards() {
-  const [hoveredCard, setHoveredCard] = useState(null)
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = [
-    {
-      id: 1,
-      name: "Aero",
-      brand: "Velocità",
-      specifications: "Automatic, Ø 41mm, Black",
-      price: 250.0,
-      image: "/pic1.jpg",
-    },
-    {
-      id: 2,
-      name: "Corsa",
-      brand: "Velocità",
-      specifications: "Quartz Chronograph, Ø 44mm, Leather",
-      price: 430.0,
-      originalPrice: 520.0,
-      image: "/pic2.png",
-    },
-    {
-      id: 3,
-      name: "Stradaas",
-      brand: "Velocità",
-      specifications: "Automatic, Ø 42mm, Black",
-      price: 360.0,
-      image: "/pic3s.png",
-    },
-    {
-      id: 4,
-      name: "Monaco",
-      brand: "Velocità",
-      specifications: "Manual Wind, Ø 39mm, Steel",
-      price: 180.0,
-      image: "/pic4.png",
-    },
-  ]
+  // Belirttiğiniz ürün ID'leri
+  const productIds = [
+    "um0E51s5XdC3h36hAKOD",
+    "RQeuohA5H5z5buJv8AIM",
+    "lBOQLTqnGSszQMyQjt3a",
+    "wYty1QygmnQjxE7A0CnV"
+  ];
 
-  const handleAddToCart = (product) => {
-    alert(`Added ${product.brand} ${product.name} to cart!`)
-  }
+  // Context'ler
+  const { addToCart, loading: cartLoading } = useCart();
+  const { 
+    favorites, 
+    loading: favLoading, 
+    addToFavorites, 
+    removeFromFavorites, 
+    isFavorite 
+  } = useFavorites();
 
-  const toggleWishlist = (productId) => {
-    console.log(`Toggled wishlist for product ${productId}`)
+  // Firebase'den belirli ID'lere göre ürünleri çek
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        
+        // Ürünleri tek tek çekmek için
+        const productsPromises = productIds.map(async (id) => {
+          const docRef = doc(db, "products", id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            return {
+              id: docSnap.id,
+              ...docSnap.data(),
+              imageUrls: docSnap.data().imageUrls || [],
+              price: parseFloat(docSnap.data().price).toFixed(2),
+              originalPrice: docSnap.data().originalPrice ? 
+                parseFloat(docSnap.data().originalPrice).toFixed(2) : null
+            };
+          }
+          return null;
+        });
+
+        const productsData = (await Promise.all(productsPromises)).filter(Boolean);
+        setProducts(productsData);
+      } catch (error) {
+        console.error("Ürünler yüklenirken hata:", error);
+        toast.error("Ürünler yüklenirken bir hata oluştu");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleAddToCart = async (product) => {
+    try {
+      await addToCart(product, 1);
+      toast.success(`${product.name} Səbətə Əlavə Olundu!`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } catch (err) {
+      console.error("Hata:", err);
+      toast.error("Səbətə Əlavə Etmək Üçün Giriş Edin!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
+
+  const handleToggleWishlist = async (product) => {
+    try {
+      if (isFavorite(product.id)) {
+        await removeFromFavorites(product.id);
+        toast.info("Favorilerden çıkarıldı", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+      } else {
+        await addToFavorites({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          imageUrls: product.imageUrls,
+          brand: product.brand
+        });
+        toast.success("Favorilere eklendi", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+      }
+    } catch (err) {
+      console.error("Favori işlemi hatası:", err);
+      toast.error("Favorilere eklemek için giriş yapmalısınız!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Ürünler yükleniyor...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
+      <ToastContainer position="top-right" autoClose={3000} />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Başlık */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-serif text-gray-900 mb-4">Lüks Saatlar</h1>
+          <h1 className="text-4xl font-serif text-gray-900 mb-4">Bu Həftənin Trend Məhsulları</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Müasir saat həvəskarları üçün diqqətlə hazırlanmış premium saat kolleksiyamızı kəşf edin.
+           Sizin Üçün Xususi Seçilmiş Saatlar
           </p>
         </div>
 
-        {/* Product Grid */}
+        {/* Ürün Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {products.map((product) => (
             <div
@@ -69,91 +148,72 @@ export default function ProductCards() {
               onMouseEnter={() => setHoveredCard(product.id)}
               onMouseLeave={() => setHoveredCard(null)}
             >
-              {/* Image Container */}
+              {/* Resim Container */}
               <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                 <img
-                  src={product.image || "/placeholder.svg"}
+                  src={product.imageUrls[0] || "/placeholder.svg"}
                   alt={`${product.brand} ${product.name}`}
                   className="w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-300"
                 />
 
-                {/* Wishlist Button */}
+                {/* Favori Butonu */}
                 <button
-                  onClick={() => toggleWishlist(product.id)}
+                  onClick={() => handleToggleWishlist(product)}
                   className={`absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-all duration-300 ${
                     hoveredCard === product.id ? "opacity-100" : "opacity-0"
                   }`}
+                  disabled={favLoading}
                 >
-                  <svg
-                    className="w-5 h-5 text-gray-600 hover:text-red-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                    />
-                  </svg>
+                  <Heart className={`w-5 h-5 ${isFavorite(product.id) ? 'text-red-500 fill-current' : 'text-gray-600 hover:text-red-500'} transition-colors`} />
                 </button>
 
-                {/* Sale Badge */}
+                {/* İndirim Etiketi */}
                 {product.originalPrice && (
                   <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 text-xs font-bold rounded">
-                    SALE
+                    İNDİRİM
                   </div>
                 )}
               </div>
 
-              {/* Product Info */}
+              {/* Ürün Bilgileri */}
               <div className="p-6 space-y-3">
-                {/* Brand and Name */}
+                {/* Marka ve İsim */}
                 <div className="space-y-1">
                   <h3 className="text-lg leading-tight">
                     <span className="italic text-gray-800 font-serif">{product.brand}</span>{" "}
                     <span className="font-normal">{product.name}</span>
                   </h3>
-                  <p className="text-sm text-gray-600 font-medium">{product.specifications}</p>
+                  <p className="text-sm text-gray-600 font-medium">{product.specifications || "Özel seçilmiş ürün"}</p>
                 </div>
 
-                {/* Price */}
+                {/* Fiyat */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xl font-semibold text-gray-900">${product.price.toFixed(2)}</span>
+                  <span className="text-xl font-semibold text-gray-900">₼{product.price}</span>
                   {product.originalPrice && (
-                    <span className="text-sm text-gray-500 line-through">${product.originalPrice.toFixed(2)}</span>
+                    <span className="text-sm text-gray-500 line-through">₼{product.originalPrice}</span>
                   )}
                 </div>
 
-                {/* Add to Cart Button */}
+                {/* Sepete Ekle Butonu */}
                 <button
                   onClick={() => handleAddToCart(product)}
-                  className="w-full mt-4 bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 font-medium tracking-wide transition-colors duration-300 flex items-center justify-center gap-2"
+                  disabled={cartLoading || product.stock <= 0}
+                  className={`w-full mt-4 bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 font-medium tracking-wide transition-colors duration-300 flex items-center justify-center gap-2 ${
+                    cartLoading ? 'opacity-75 cursor-not-allowed' : ''
+                  } ${
+                    product.stock <= 0 ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed' : ''
+                  }`}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"
-                    />
-                  </svg>
-                  ADD TO CART
+                  <ShoppingBag className="w-4 h-4" />
+                  {product.stock <= 0 ? 'STOKTA YOK' : 
+                   cartLoading ? 'EKLEMİYOR...' : 'Səbətə Əlavə Et'}
                 </button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Call to Action */}
-        <div className="text-center mt-16">
-          <button className="bg-gray-900 text-white px-8 py-3 font-medium tracking-wide hover:bg-gray-800 transition-colors duration-300">
-            VIEW ALL COLLECTIONS
-          </button>
-        </div>
-
-        {/* Features Section */}
+        {/* Özellikler Bölümü */}
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center p-6">
             <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -167,9 +227,8 @@ export default function ProductCards() {
               </svg>
             </div>
             <h3 className="text-lg font-semibold mb-2">Pulsuz Çatdırılma</h3>
-            <p className="text-gray-600">50 Manat Üstü Sifarişlərdə Pulsuz Çatdırılma</p>
+            <p className="text-gray-600">Şəhər Daxili Pulsuz Çatdırılma</p>
           </div>
-
           <div className="text-center p-6">
             <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,10 +240,9 @@ export default function ProductCards() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">6 Ay Zəmanət</h3>
-            <p className="text-gray-600">Tüm Məhsullara 6 Ay Zəmanət</p>
+            <h3 className="text-lg font-semibold mb-2">6 Ay Garanti</h3>
+            <p className="text-gray-600">Tüm Məhsullar 6 Ay Garantilidir</p>
           </div>
-
           <div className="text-center p-6">
             <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,12 +254,11 @@ export default function ProductCards() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Müasir Texniki Dəstək</h3>
-            <p className="text-gray-600">
-Saat mütəxəssislərindən 24/7 müştəri dəstəyi</p>
+            <h3 className="text-lg font-semibold mb-2">Texniki Dəstək</h3>
+            <p className="text-gray-600">7/24 Saat Mütəxəssisləri Tərəfindən Dəstək</p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

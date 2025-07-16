@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { useCart } from './CardContext';
 import { auth } from './Firebase';
 import { User, Phone, Home } from 'react-feather';
+import WhatsAppButton from './WhatsappCheckOut';
 
 const SERVICE_ID   = 'service_62zlvkx';
 const TEMPLATE_ID  = 'template_zk7ajg9';
@@ -135,6 +136,10 @@ export default function CheckoutPage() {
             {loading ? 'Göndərilir...' : 'Sifarişi Tamamla'}
           </button>
         </form>
+        <WhatsAppButton
+  cart={cart}
+  getFormattedSubtotal={getFormattedSubtotal}
+/>
       </div>
     </div>
   );

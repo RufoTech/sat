@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 
 const Introduction = () => {
   return (
@@ -18,9 +19,9 @@ const Introduction = () => {
             <h1 className="text-white paraqraf font-bold py-3">Əla Qiymətlərə Əla Hədiyyələr</h1>
             
             {/* Buton - Hover'da hareket etmiyor, her zaman görünür */}
-            <button className="bg-blue-700 text-white font-bold px-6 py-2 rounded-md hover:bg-blue-800 transition duration-300">
+            <Link to={"/brands"}><button className="bg-blue-700 text-white font-bold px-6 py-2 rounded-md hover:bg-blue-800 transition duration-300">
               Endirimli Məhsullarla Alış-veriş et
-            </button>
+            </button></Link>
           </div>
         </div>
         {/* Lüks çerçeve efekti */}
@@ -41,9 +42,9 @@ const Introduction = () => {
             <h2 className="text-white text-3xl py-3 playfair-display font-bold">30 Faizə Qədər Endirimlər</h2>
             
             {/* Buton - Hover'da hareket etmiyor, her zaman görünür */}
-            <button className="bg-blue-700 text-white font-bold text-sm sm:text-base px-4 sm:px-6 py-2 rounded-md hover:bg-blue-800 transition duration-300 whitespace-nowrap overflow-hidden tracking-[0.12em] uppercase">
+             <Link to={"/brands"}><button className="bg-blue-700 text-white font-bold px-6 py-2 rounded-md hover:bg-blue-800 transition duration-300">
               Endirimli Məhsullarla Alış-veriş et
-            </button>
+            </button></Link>
           </div>
         </div>
         {/* Lüks çerçeve efekti */}
