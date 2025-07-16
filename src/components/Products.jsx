@@ -580,8 +580,8 @@ export default function LuxuryProductShowcase() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Ücretsiz Kargo</h3>
-            <p className="text-gray-600">200 TL üzeri tüm siparişlerde ücretsiz kargo</p>
+            <h3 className="text-lg font-semibold mb-2">Pulsuz Çatdırılma</h3>
+            <p className="text-gray-600">Şəhər Daxili Pulsuz Çatdırılma</p>
           </div>
           <div className="text-center p-6">
             <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -594,8 +594,8 @@ export default function LuxuryProductShowcase() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">2 Yıl Garanti</h3>
-            <p className="text-gray-600">Tüm ürünlerimiz 2 yıl garantilidir</p>
+            <h3 className="text-lg font-semibold mb-2">6 Ay Garanti</h3>
+            <p className="text-gray-600">Tüm Məhsullarımız 6 Ay Zəmanətlidir</p>
           </div>
           <div className="text-center p-6">
             <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -608,8 +608,8 @@ export default function LuxuryProductShowcase() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Uzman Desteği</h3>
-            <p className="text-gray-600">7/24 uzman müşteri desteği</p>
+            <h3 className="text-lg font-semibold mb-2">Texniki Dəstək</h3>
+            <p className="text-gray-600">7/24 Aktiv Mütəxəssis Dəstəyi</p>
           </div>
         </div>
       </div>
