@@ -5,7 +5,7 @@ const whatsappNumber = '994993490934'; // Tom formatında: 994xx...
 
 export default function WhatsAppButton({ cart, getFormattedSubtotal }) {
   // Unicode ilə simvolları aydın şəkildə saxlayırıq
-  const header   = '\u{1F6D2} Yeni WhatsApp Sifarişi';
+  const header   = '\u{1F6D2} Salam bu saatlarla maraqlanırdım və ya sipariş etmək istəyirdim.';
   const box      = '\u{1F4E6}';
   const money    = '\u{1F4B0}';
   const currency = '\u20BC';
